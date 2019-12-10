@@ -23,18 +23,38 @@ def se_ven(p1,p2,asteroids):
 with open("input1.txt","r") as f:
     asteroids=[list(l.strip()) for l in f.readlines()]
 
-asteroid_locations=[]
+asteroid_locations=dict()
 for i in range(len(asteroids)):
     for j in range(len(asteroids[i])):
         if asteroids[i][j]=='#':
-            asteroid_locations.append((i,j))
+            asteroid_locations[(i,j)]=[]
 
 view_count=[0 for _ in asteroid_locations]
-for i,loc in enumerate(asteroid_locations):
-    for ast in asteroid_locations:
+for loc in asteroid_locations.keys():
+    for ast in asteroid_locations.keys():
         if loc==ast:
             continue
         if se_ven(loc,ast,asteroids):
-            view_count[i]+=1
-laser=asteroid_locations[view_count.index(max(view_count))]
-#ideas: dict con los asteroides a la vista, contador de eliminados y cuando llegue a 200 los que esten a la vista ordenarles de alguna forma
+            asteroid_locations[loc].append(ast)
+laser=max(asteroid_locations.items(),key=lambda x:len(x[1]))[0]
+print(len(asteroid_locations[laser]))
+#solo funciona si se carga mas de 200 en la primera vuelta
+#sino hay que eliminar todos los del diccionari y calcular de nuevo la parte anterior
+j_mayor_0=[]#a la derecha de laser
+j_menor_0=[]#a la izq de laser
+en_vertical_arriba=[]
+en_vertical_abajo=[]
+for ast in asteroid_locations[laser]:
+    if ast[1]>laser[1]:
+        j_mayor_0.append(ast)
+    elif ast[1]<laser[1]:
+        j_menor_0.append(ast)
+    else:
+        if ast[0]>laser[0]:
+            en_vertical_arriba.append(ast)
+        else:
+            en_vertical_abajo.append(ast)
+j_mayor_0.sort(key=lambda x:(x[0]-laser[0])/(x[1]-laser[1]))
+j_menor_0.sort(key=lambda x:(x[0]-laser[0])/(x[1]-laser[1]))
+ordered_asteroids=en_vertical_arriba+j_mayor_0+en_vertical_abajo+j_menor_0
+print(ordered_asteroids[199][0]+ordered_asteroids[199][1]*100)
