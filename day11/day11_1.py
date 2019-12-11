@@ -74,8 +74,41 @@ def run_intcode(memory,input_stream=None,output_l=None):
             i=instruction
         else:
             i+=inc_dict[opcode]
+        if len(output_l)>0:
+            yield output_l.pop()
+from operator import add
+from collections import defaultdict
+class Hull_robot:
+    def __init__(self):
+        self.direction=(-1,0)
+        self.pos=(0,0)
+        self.mapa=defaultdict(int)
+    def move(self):
+        self.pos=tuple(map(add,self.pos,self.direction))
+    def turn(self,lado):
+        if abs(self.direction[1])==lado:
+            self.direction=(self.direction[1],self.direction[0])
+        else:
+            self.direction=(-self.direction[1],-self.direction[0])
+    def paint(self,color):
+        self.mapa[self.pos]=color
+    def get_color(self):
+        return self.mapa[self.pos]
 
 with open("input1.txt","r") as f:
     code=Infinite_memory(map(int,f.readline().split(",")))
 
-run_intcode(code)
+_exhausted = object()
+entrada,salida=[],[]
+g=run_intcode(code,input_stream=entrada,output_l=salida)
+robot=Hull_robot()
+while True:
+    entrada.append(robot.get_color())
+    color=next(g,_exhausted)
+    if color==_exhausted:
+        break
+    robot.paint(color)
+    lado=next(g)
+    robot.turn(lado)
+    robot.move()
+print(len(robot.mapa.keys()))
