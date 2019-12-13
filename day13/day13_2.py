@@ -20,8 +20,7 @@ def run_intcode(memory,input_stream=None,output_l=None):
     def mult(args):
         memory[args[2]]=args[0]*args[1]
     def inpt(args):
-        if input_stream==None:#draw before input
-            draw(output_l)
+        if input_stream==None:
             memory[args[0]]=int(input(">"))
         else:
             memory[args[0]]=input_stream.pop(0)
@@ -52,6 +51,7 @@ def run_intcode(memory,input_stream=None,output_l=None):
         param_bits=list(opcode[:-2])
         opcode=int(opcode[-2:])
         if opcode==99:
+            yield output_l
             break
         params=[]
         for p in range(1,inc_dict[opcode]):
@@ -70,32 +70,34 @@ def run_intcode(memory,input_stream=None,output_l=None):
             else:                                                                   #default read positional
                 params.append(memory[memory[i+p]])
 
+        if opcode==3 and len(input_stream)==0:
+            yield output_l
+            output_l=[]
         instruction=func_dict[opcode](params)
         if instruction:
             i=instruction
         else:
             i+=inc_dict[opcode]
-
-def draw(data):
-    pixels=[(data[i-2],data[i-1],data[i]) for i in range(2,len(data),3)]
-    pixels.sort(key=lambda x: x[0])
-    pixels.sort(key=lambda x: x[1])
-    #score=pixels.pop(0)[2]
-    print("score: {}")
-    matrix=[]
-    for i in range(0,max(pixels,key=lambda x: x[1])[1]):
-        matrix.append([])
-        for j in range(0,max(pixels,key=lambda x: x[0])[0]):
-            matrix[i].append(pixels[i*max(pixels,key=lambda x: x[0])[0]+j][2])
-    for l in matrix:
-        print()
-        for p in l:
-            print(p,end='')
-    print()
     
 with open("input1.txt","r") as f:
     code=Infinite_memory(map(int,f.readline().split(",")))
 code[0]=2
-out=[]
-run_intcode(code,output_l=out)
-  
+out,inp=[],[]
+for data in run_intcode(code,input_stream=inp,output_l=out):
+    useful_data=[(data[i-2],data[i-1],data[i]) for i in range(2,len(data),3) if data[i]==3 or data[i]==4 or data[i-2]==-1]
+    score_l=[d for d in useful_data if d[0]==-1]
+    paddle_l=[d for d in useful_data if d[2]==3]
+    ball_l=[d for d in useful_data if d[2]==4]
+    if score_l:
+        score=score_l[0][2]
+    if paddle_l:
+        paddle=paddle_l[0]
+    if ball_l:
+        ball=ball_l[0]
+    if ball[0]>paddle[0]:
+        inp.append(1)
+    elif ball[0]<paddle[0]:
+        inp.append(-1)
+    else:
+        inp.append(0)
+print(score)
