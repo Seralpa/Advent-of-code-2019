@@ -23,11 +23,11 @@ def run_intcode(memory,input_stream=None,output_l=None):
         if input_stream:
             memory[args[0]]=input_stream.pop(0)
         else:
-            memory[args[0]]=int(input(">"))
+            memory[args[0]]=input(">")
     def output(args):
         if output_l==None:
-            #print(args[0])
-            print(str(chr(args[0])),end='')
+            print(args[0])
+            #print(str(chr(args[0])),end='')
         else:
             output_l.append(args[0])
     def j_if_t(args):
@@ -81,15 +81,6 @@ with open("input.txt","r") as f:
 code[0]=2
 out=[]
 mapa=[[]]
-run_intcode(code)
-# for c in out:
-#     if c==10:
-#         mapa.append([])
-#     else:
-#         mapa[-1].append(str(chr(c)))
-# mapa.pop()
-# mapa.pop()
-# for i in range(len(mapa)):
-#     for j in range(len(mapa[i])):
-#         if i>0 and j>0 and i<len(mapa)-1 and j<len(mapa[i])-1 and mapa[i][j]=='#' and mapa[i-1][j]=='#' and mapa[i+1][j]=='#' and mapa[i][j-1]=='#' and mapa[i][j+1]=='#':
-#             count+=i*j
+inp=list(map(ord,"A,B,A,C,B,C,A,B,A,C\nR,10,L,8,R,10,R,4\nL,6,L,6,R,10\nL,6,R,12,R,12,R,10\nn\n"))
+print(inp)
+run_intcode(code,input_stream=inp)
